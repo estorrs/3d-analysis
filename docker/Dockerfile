@@ -6,9 +6,13 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
 RUN bash ~/miniconda.sh -b -p /miniconda
 ENV PATH="/miniconda/bin:$PATH"
 
-RUN conda install -y -c conda-forge jupyter jupyter_contrib_nbextensions python=3.11
+RUN conda install -y -c conda-forge jupyter jupyter_contrib_nbextensions python=3.11 r-base=4.4.3
 RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 RUN conda install -y -c conda-forge scanpy seaborn tifffile ome-types scikit-image scikit-learn pyyaml einops
+
+RUN R -e 'install.packages(c("Seurat", "remotes"), repos = "http://cran.us.r-project.org")'
+RUN R -e 'remotes::install_github("satijalab/seurat-data", quiet = TRUE)'
+
 
 # get env file seperately so it doesn't reinstall every time
 # COPY ./env.yaml /pecgs-cnv/env.yaml
