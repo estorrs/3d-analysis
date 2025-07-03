@@ -2,6 +2,8 @@
 data/
 log.txt
 
+.RData
+.Rdata
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
