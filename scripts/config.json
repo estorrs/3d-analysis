@@ -1,0 +1,9 @@
+{
+  "metadata_csv": "xenium_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.csv",
+  "panel_reference_csv": "xenium_reference/supplemental_tables.xlsx - Table S5.csv",
+  "output_dir": "outputs_xenium",
+  "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.filled.csv",
+  "include_specimens": [],
+  "path_overrides_by_specimen": {},
+  "hgnc_version": ""
+}

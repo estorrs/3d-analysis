@@ -1,0 +1,15 @@
+{
+  "metadata_csv": "xenium_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.csv",
+  "panel_reference_csv": "xenium_reference/supplemental_tables.xlsx - Table S5.csv",
+  "output_dir": "outputs_xenium",
+  "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.example_filled.csv",
+  "include_specimens": [
+    "HT591B1-S1H1Fp1Us1_1",
+    "HT944B1-S2H2bFpU1"
+  ],
+  "path_overrides_by_specimen": {
+    "HT591B1-S1H1Fp1Us1_1": "/Users/erikstorrs/Downloads/output-XETG00122__0010660__HT591B1-S1H1Fp1Us1_1__20230803__200008",
+    "HT944B1-S2H2bFpU1": "/Users/erikstorrs/Downloads/output-XETG00523__0037640__HT944B1-S2H2bFpU1__20250124__223012"
+  },
+  "hgnc_version": ""
+}

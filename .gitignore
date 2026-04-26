@@ -1,6 +1,8 @@
 #
 data/
 log.txt
+outputs*/
+.DS_Store
 
 .RData
 .Rdata
