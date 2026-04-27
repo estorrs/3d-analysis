@@ -1,15 +1,78 @@
 {
-  "metadata_csv": "xenium_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.csv",
-  "panel_reference_csv": "xenium_reference/supplemental_tables.xlsx - Table S5.csv",
-  "output_dir": "outputs_xenium",
-  "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.example_filled.csv",
-  "include_specimens": [
-    "HT591B1-S1H1Fp1Us1_1",
-    "HT944B1-S2H2bFpU1"
-  ],
-  "path_overrides_by_specimen": {
-    "HT591B1-S1H1Fp1Us1_1": "/Users/erikstorrs/Downloads/output-XETG00122__0010660__HT591B1-S1H1Fp1Us1_1__20230803__200008",
-    "HT944B1-S2H2bFpU1": "/Users/erikstorrs/Downloads/output-XETG00523__0037640__HT944B1-S2H2bFpU1__20250124__223012"
-  },
-  "hgnc_version": ""
+  "jobs": [
+    {
+      "name": "xenium-example",
+      "modality": "xenium",
+      "metadata_csv": "xenium_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.csv",
+      "panel_reference_csv": "xenium_reference/supplemental_tables.xlsx - Table S5.csv",
+      "output_dir": "outputs_xenium",
+      "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.example_filled.csv",
+      "include_specimens": [
+        "HT591B1-S1H1Fp1Us1_1",
+        "HT944B1-S2H2bFpU1"
+      ],
+      "path_overrides_by_specimen": {
+        "HT591B1-S1H1Fp1Us1_1": "/Users/erikstorrs/Downloads/output-XETG00122__0010660__HT591B1-S1H1Fp1Us1_1__20230803__200008",
+        "HT944B1-S2H2bFpU1": "/Users/erikstorrs/Downloads/output-XETG00523__0037640__HT944B1-S2H2bFpU1__20250124__223012"
+      },
+      "hgnc_version": ""
+    },
+    {
+      "name": "visium-example",
+      "modality": "visium",
+      "metadata_csv": "visium_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Visium.csv",
+      "output_dir": "outputs_visium",
+      "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Visium.example_filled.csv",
+      "include_specimens": [
+        "HT397B1-S1H3A1U1Bp1",
+        "HT935Z1-S1H1Fp1U2",
+        "HT206B1-S1Fc1U1Z1B1"
+      ],
+      "path_overrides_by_specimen": {
+        "HT397B1-S1H3A1U1Bp1": "/Users/erikstorrs/Downloads/HT397B1-S1H3A1U1Bp1/HT397B1-S1H3A1U1Bp1",
+        "HT935Z1-S1H1Fp1U2": "/Users/erikstorrs/Downloads/HT935Z1-S1H1Fp1U2",
+        "HT206B1-S1Fc1U1Z1B1": "/Users/erikstorrs/Downloads/HT206B1-U1_ST_Bn1"
+      },
+      "hgnc_version": ""
+    },
+    {
+      "name": "cosmx-example",
+      "modality": "cosmx",
+      "metadata_csv": "cosmx_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - CosMx.csv",
+      "tracking_csv": "cosmx_reference/2d data tracking - cosmx.csv",
+      "rscript_path": "/Users/erikstorrs/miniforge3/envs/sc/bin/Rscript",
+      "output_dir": "outputs_cosmx",
+      "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - CosMx.example_filled.csv",
+      "include_specimens": [
+        "SP012Z1-Fp1A15-Ux",
+        "SP005Z1-Fp1A25-Ux",
+        "HT704B1-S1H3Fp1_U47",
+        "HT704B1-S1H3Fp1_U56"
+      ],
+      "path_overrides_by_specimen": {
+        "SP012Z1-Fp1A15-Ux": "/Users/erikstorrs/Downloads/729fe24a-ddf3-4726-bc0f-b4897a9895f0_seuratObject.RDS",
+        "SP005Z1-Fp1A25-Ux": "/Users/erikstorrs/Downloads/729fe24a-ddf3-4726-bc0f-b4897a9895f0_seuratObject.RDS",
+        "HT704B1-S1H3Fp1_U47": "/Users/erikstorrs/Downloads/c769c2ec-80b0-4eb0-988a-8c94f19dd5b7_seuratObject.RDS",
+        "HT704B1-S1H3Fp1_U56": "/Users/erikstorrs/Downloads/c769c2ec-80b0-4eb0-988a-8c94f19dd5b7_seuratObject.RDS"
+      },
+      "hgnc_version": ""
+    },
+    {
+      "name": "codex-level2-example",
+      "modality": "codex",
+      "survey_csv": "codex_reference/HTAN2 3D Prostate Breast Data Survey - Datafiles.csv",
+      "experiment_filter": "codex",
+      "level_filter": "level2",
+      "output_dir": "outputs_codex",
+      "metadata_output_filename": "HTAN2 3D Prostate Breast_ Multiplex Microscopy Level 2 - CODEX.example_generated.csv",
+      "include_specimens": [
+        "HT206B1-H2L1-U2",
+        "HT704B1-S1H3Fp1-U43"
+      ],
+      "path_overrides_by_specimen": {
+        "HT206B1-H2L1-U2": "/Users/erikstorrs/Downloads/HT206B1-H2L1-U2__20230914.ome.tiff",
+        "HT704B1-S1H3Fp1-U43": "/Users/erikstorrs/Downloads/HT704B1_U43__20240705.ome.tiff"
+      }
+    }
+  ]
 }

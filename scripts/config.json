@@ -1,9 +1,48 @@
 {
-  "metadata_csv": "xenium_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.csv",
-  "panel_reference_csv": "xenium_reference/supplemental_tables.xlsx - Table S5.csv",
-  "output_dir": "outputs_xenium",
-  "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.filled.csv",
-  "include_specimens": [],
-  "path_overrides_by_specimen": {},
-  "hgnc_version": ""
+  "jobs": [
+    {
+      "name": "xenium",
+      "modality": "xenium",
+      "metadata_csv": "xenium_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.csv",
+      "panel_reference_csv": "xenium_reference/supplemental_tables.xlsx - Table S5.csv",
+      "output_dir": "outputs_xenium",
+      "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Xenium.filled.csv",
+      "include_specimens": [],
+      "path_overrides_by_specimen": {},
+      "hgnc_version": ""
+    },
+    {
+      "name": "visium",
+      "modality": "visium",
+      "metadata_csv": "visium_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Visium.csv",
+      "output_dir": "outputs_visium",
+      "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - Visium.filled.csv",
+      "include_specimens": [],
+      "path_overrides_by_specimen": {},
+      "hgnc_version": ""
+    },
+    {
+      "name": "cosmx",
+      "modality": "cosmx",
+      "metadata_csv": "cosmx_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - CosMx.csv",
+      "tracking_csv": "cosmx_reference/2d data tracking - cosmx.csv",
+      "rscript_path": "/Users/erikstorrs/miniforge3/envs/sc/bin/Rscript",
+      "output_dir": "outputs_cosmx",
+      "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - CosMx.filled.csv",
+      "include_specimens": [],
+      "path_overrides_by_specimen": {},
+      "hgnc_version": ""
+    },
+    {
+      "name": "codex-level2",
+      "modality": "codex",
+      "survey_csv": "codex_reference/HTAN2 3D Prostate Breast Data Survey - Datafiles.csv",
+      "experiment_filter": "codex",
+      "level_filter": "level2",
+      "output_dir": "outputs_codex",
+      "metadata_output_filename": "HTAN2 3D Prostate Breast_ Multiplex Microscopy Level 2 - CODEX.generated.csv",
+      "include_specimens": [],
+      "path_overrides_by_specimen": {}
+    }
+  ]
 }
