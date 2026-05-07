@@ -23,6 +23,7 @@ import re
 import subprocess
 import sys
 import tarfile
+import xml.etree.ElementTree as ET
 from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
@@ -284,11 +285,27 @@ def is_ome_tiff(filename: str) -> bool:
     return filename.lower().endswith(OME_TIFF_EXTENSIONS)
 
 
+def determine_image_file_format(path: Path) -> str:
+    name = path.name.lower()
+    if is_ome_tiff(name):
+        return "ome-tiff"
+    if name.endswith(".qptiff"):
+        return "qptiff"
+    return path.suffix.lstrip(".").lower()
+
+
 def check_path_exists(path: Path) -> tuple[bool, str]:
     try:
         return path.exists(), ""
     except OSError as exc:
         return False, f"{exc.__class__.__name__}: {exc}"
+
+
+def short_exception(exc: Exception, max_length: int = 240) -> str:
+    text = f"{exc.__class__.__name__}: {exc}"
+    if len(text) <= max_length:
+        return text
+    return text[: max_length - 3] + "..."
 
 
 def log(message: str) -> None:
@@ -1401,13 +1418,8 @@ def required_fields_for_codex_row(row: dict[str, str]) -> list[str]:
     return required
 
 
-def extract_he_row(source_path: Path) -> tuple[dict[str, str], list[str]]:
-    from ome_types import from_tiff
-
-    ome = from_tiff(source_path)
-    warnings: list[str] = []
-
-    derived = {
+def he_default_metadata(source_path: Path) -> dict[str, str]:
+    return {
         "CITATION_OR_DOI": "https://doi.org/10.1158/2159-8290.CD-26-0012",
         "DE_IDENTIFICATION_METHOD_TYPE": "Automatic",
         "DE_IDENTIFIED": "TRUE",
@@ -1415,7 +1427,7 @@ def extract_he_row(source_path: Path) -> tuple[dict[str, str], list[str]]:
         "HAS_SLIDE_LABEL": "FALSE",
         "IMAGE_MODALITY": "SM",
         "IMAGING_EQUIPMENT_MANUFACTURER": "Akoya",
-        "IMAGING_SOFTWARE": as_clean_string(getattr(ome, "creator", "")),
+        "IMAGING_SOFTWARE": "",
         "LICENSE": "CC BY 4.0",
         "NOMINAL_MAGNIFICATION": "",
         "OBJECTIVE": "",
@@ -1424,9 +1436,59 @@ def extract_he_row(source_path: Path) -> tuple[dict[str, str], list[str]]:
         "SPECIES": "9606 (Homo sapiens)",
         "STAINING_METHOD": "H&E",
         "FILENAME": source_path.name,
-        "FILE_FORMAT": "ome-tiff" if is_ome_tiff(source_path.name) else source_path.suffix.lstrip("."),
+        "FILE_FORMAT": determine_image_file_format(source_path),
         "HAS_ANNOTATIONS": "FALSE",
     }
+
+
+def read_qptiff_metadata(source_path: Path) -> tuple[dict[str, str], list[str]]:
+    from PIL import Image
+
+    Image.MAX_IMAGE_PIXELS = None
+    warnings: list[str] = []
+    metadata: dict[str, str] = {}
+
+    with Image.open(source_path) as image:
+        metadata["SIZE_X"] = maybe_number_to_string(image.size[0])
+        metadata["SIZE_Y"] = maybe_number_to_string(image.size[1])
+        metadata["SIZE_C"] = "3" if image.mode == "RGB" else maybe_number_to_string(len(image.getbands()))
+
+        description = image.tag_v2.get(270)
+        software = as_clean_string(image.tag_v2.get(305))
+
+    if description:
+        try:
+            root = ET.fromstring(as_clean_string(description))
+            acquisition_software = as_clean_string(root.findtext("AcquisitionSoftware"))
+            if acquisition_software:
+                software = acquisition_software
+        except ET.ParseError as exc:
+            warnings.append(f"Could not parse QPTIFF ImageDescription XML: {exc}")
+
+    metadata["IMAGING_SOFTWARE"] = software
+    return metadata, warnings
+
+
+def extract_he_row(source_path: Path) -> tuple[dict[str, str], list[str]]:
+    warnings: list[str] = []
+    derived = he_default_metadata(source_path)
+
+    try:
+        from ome_types import from_tiff
+
+        ome = from_tiff(source_path)
+        derived["IMAGING_SOFTWARE"] = as_clean_string(getattr(ome, "creator", ""))
+        return derived, warnings
+    except Exception as exc:
+        if source_path.suffix.lower() not in {".qptiff", ".tif", ".tiff"}:
+            raise
+        warnings.append(f"OME metadata could not be parsed; using TIFF tag metadata fallback: {short_exception(exc)}")
+
+    fallback_metadata, fallback_warnings = read_qptiff_metadata(source_path)
+    warnings.extend(fallback_warnings)
+    for field, value in fallback_metadata.items():
+        if field in HE_METADATA_FIELDS and not is_blank(value):
+            derived[field] = value
 
     return derived, warnings
 
