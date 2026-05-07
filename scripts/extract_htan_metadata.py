@@ -3,6 +3,7 @@
 
 Usage:
     python extract_htan_metadata.py config.json
+    python extract_htan_metadata.py config.json --modalities xenium visium
 
 The config can contain one job or multiple jobs. Each job represents a modality
 such as Xenium or Visium and produces:
@@ -2070,17 +2071,62 @@ def resolve_jobs(config: dict) -> list[dict]:
     return [single_job]
 
 
+def parse_selected_job_tokens(values: list[str] | None) -> set[str]:
+    selected = set()
+    for value in values or []:
+        for token in str(value).split(","):
+            cleaned = as_clean_string(token).lower()
+            if cleaned:
+                selected.add(cleaned)
+    return selected
+
+
+def filter_jobs(jobs: list[dict], selected_tokens: set[str]) -> list[dict]:
+    if not selected_tokens:
+        return jobs
+
+    filtered = []
+    for job in jobs:
+        modality = as_clean_string(job.get("modality")).lower()
+        name = as_clean_string(job.get("name")).lower()
+        if modality in selected_tokens or name in selected_tokens:
+            filtered.append(job)
+
+    if filtered:
+        return filtered
+
+    available = sorted(
+        {
+            value
+            for job in jobs
+            for value in [as_clean_string(job.get("modality")).lower(), as_clean_string(job.get("name")).lower()]
+            if value
+        }
+    )
+    raise ValueError(
+        "No jobs matched --modalities selection. "
+        f"Requested: {sorted(selected_tokens)}. Available job names/modalities: {available}"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("config", help="Path to the JSON configuration file.")
+    parser.add_argument(
+        "--modalities",
+        nargs="+",
+        help="Optional list of data types or job names to run, for example: xenium visium he or codex-level2.",
+    )
     args = parser.parse_args()
 
     config_path = Path(args.config).expanduser().resolve()
     config_dir = config_path.parent
     config = json.loads(config_path.read_text())
+    selected_tokens = parse_selected_job_tokens(args.modalities)
+    jobs = filter_jobs(resolve_jobs(config), selected_tokens)
 
     summaries = []
-    for job in resolve_jobs(config):
+    for job in jobs:
         summaries.append(process_job(job, config_dir))
 
     print(json.dumps(summaries if len(summaries) > 1 else summaries[0], indent=2))
