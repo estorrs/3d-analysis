@@ -284,6 +284,13 @@ def is_ome_tiff(filename: str) -> bool:
     return filename.lower().endswith(OME_TIFF_EXTENSIONS)
 
 
+def check_path_exists(path: Path) -> tuple[bool, str]:
+    try:
+        return path.exists(), ""
+    except OSError as exc:
+        return False, f"{exc.__class__.__name__}: {exc}"
+
+
 def log(message: str) -> None:
     print(message, file=sys.stderr, flush=True)
 
@@ -1479,14 +1486,20 @@ def process_codex_job(job: dict, config_dir: Path) -> dict[str, object]:
         log(f"[{index}/{len(metadata_rows)}] Processing specimen: {specimen or '<blank>'}")
         log(f"  Source path: {source_path}")
 
-        if not source_path.exists():
-            log("  Source path not found; leaving row unresolved")
+        path_exists, path_error = check_path_exists(source_path)
+        if not path_exists:
+            if path_error:
+                log(f"  Could not access source path; skipping row: {path_error}")
+                detail = f"Could not access source CODEX image path: {path_error}"
+            else:
+                log("  Source path not found; leaving row unresolved")
+                detail = "Source CODEX image path does not exist"
             unresolved_rows.append(
                 {
                     "WUSTL Specimen": specimen,
                     "FIELD": "WUSTL Path",
                     "VALUE": source_path_text,
-                    "DETAIL": "Source CODEX image path does not exist",
+                    "DETAIL": detail,
                 }
             )
             continue
@@ -1640,14 +1653,20 @@ def process_he_job(job: dict, config_dir: Path) -> dict[str, object]:
         log(f"[{index}/{len(metadata_rows)}] Processing specimen: {specimen or '<blank>'}")
         log(f"  Source path: {source_path}")
 
-        if not source_path.exists():
-            log("  Source path not found; leaving row unresolved")
+        path_exists, path_error = check_path_exists(source_path)
+        if not path_exists:
+            if path_error:
+                log(f"  Could not access source path; skipping row: {path_error}")
+                detail = f"Could not access source H&E image path: {path_error}"
+            else:
+                log("  Source path not found; leaving row unresolved")
+                detail = "Source H&E image path does not exist"
             unresolved_rows.append(
                 {
                     "WUSTL Specimen": specimen,
                     "FIELD": "WUSTL Path",
                     "VALUE": source_path_text,
-                    "DETAIL": "Source H&E image path does not exist",
+                    "DETAIL": detail,
                 }
             )
             continue
@@ -1910,20 +1929,39 @@ def process_job(job: dict, config_dir: Path) -> dict[str, object]:
         log(f"[{processed_counter}/{total_selected}] Processing specimen: {specimen or '<blank>'}")
         log(f"  Source path: {source_path}")
 
-        if not source_path.exists():
-            log("  Source path not found; leaving row unresolved")
+        path_exists, path_error = check_path_exists(source_path)
+        if not path_exists:
+            if path_error:
+                log(f"  Could not access source path; skipping row: {path_error}")
+                detail = f"Could not access source {modality} path: {path_error}"
+            else:
+                log("  Source path not found; leaving row unresolved")
+                detail = f"Source {modality} path does not exist"
             unresolved_rows.append(
                 {
                     "WUSTL Specimen": specimen,
                     "FIELD": "WUSTL Path",
                     "VALUE": source_path_text,
-                    "DETAIL": f"Source {modality} path does not exist",
+                    "DETAIL": detail,
                 }
             )
             processed_by_index[index] = working_row
             continue
 
-        result = extract_row(working_row, source_path, modality, context)
+        try:
+            result = extract_row(working_row, source_path, modality, context)
+        except Exception as exc:
+            log(f"  Failed to extract metadata; skipping row: {exc}")
+            unresolved_rows.append(
+                {
+                    "WUSTL Specimen": specimen,
+                    "FIELD": "__file__",
+                    "VALUE": source_path.name,
+                    "DETAIL": f"Could not extract metadata from {modality} source: {exc}",
+                }
+            )
+            processed_by_index[index] = working_row
+            continue
         if result.panel_export:
             panel_exports.append(result.panel_export)
 
