@@ -26,7 +26,7 @@
       "modality": "cosmx",
       "metadata_csv": "cosmx_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - CosMx.csv",
       "tracking_csv": "cosmx_reference/2d data tracking - cosmx.csv",
-      "rscript_path": "/Users/erikstorrs/miniforge3/envs/sc/bin/Rscript",
+      "rscript_path": "Rscript",
       "output_dir": "outputs_cosmx",
       "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - CosMx.filled.csv",
       "include_specimens": [],

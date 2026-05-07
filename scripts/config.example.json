@@ -40,7 +40,7 @@
       "modality": "cosmx",
       "metadata_csv": "cosmx_reference/HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - CosMx.csv",
       "tracking_csv": "cosmx_reference/2d data tracking - cosmx.csv",
-      "rscript_path": "/Users/erikstorrs/miniforge3/envs/sc/bin/Rscript",
+      "rscript_path": "Rscript",
       "output_dir": "outputs_cosmx",
       "metadata_output_filename": "HTAN2 3D Prostate Breast_ Spatial Omics Level 3 - CosMx.example_filled.csv",
       "include_specimens": [
@@ -84,11 +84,13 @@
       "metadata_output_filename": "HTAN2 3D Prostate Breast_ Digital Pathology Level 2 - HE.example_generated.csv",
       "include_specimens": [
         "HT891Z1-S2H3FP1_U7",
-        "HT913Z1-S2H1Fp1_U24"
+        "HT913Z1-S2H1Fp1_U24",
+        "HT397B1-S1H3A1U28"
       ],
       "path_overrides_by_specimen": {
         "HT891Z1-S2H3FP1_U7": "/Users/erikstorrs/Downloads/HT891Z1-S2H3FP1_U7.ome.tif",
-        "HT913Z1-S2H1Fp1_U24": "/Users/erikstorrs/Downloads/HT913Z1_U24.ome.tif"
+        "HT913Z1-S2H1Fp1_U24": "/Users/erikstorrs/Downloads/HT913Z1_U24.ome.tif",
+        "HT397B1-S1H3A1U28": "/Users/erikstorrs/Downloads/HT397B1-S1H3A1U28_Scan1.qptiff"
       }
     }
   ]
