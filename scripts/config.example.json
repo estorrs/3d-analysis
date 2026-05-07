@@ -73,6 +73,23 @@
         "HT206B1-H2L1-U2": "/Users/erikstorrs/Downloads/HT206B1-H2L1-U2__20230914.ome.tiff",
         "HT704B1-S1H3Fp1-U43": "/Users/erikstorrs/Downloads/HT704B1_U43__20240705.ome.tiff"
       }
+    },
+    {
+      "name": "he-level2-example",
+      "modality": "he",
+      "survey_csv": "he_reference/HTAN2 3D Prostate Breast Data Survey - Datafiles.csv",
+      "experiment_filter": "he",
+      "level_filter": "level2",
+      "output_dir": "outputs_he",
+      "metadata_output_filename": "HTAN2 3D Prostate Breast_ Digital Pathology Level 2 - HE.example_generated.csv",
+      "include_specimens": [
+        "HT891Z1-S2H3FP1_U7",
+        "HT913Z1-S2H1Fp1_U24"
+      ],
+      "path_overrides_by_specimen": {
+        "HT891Z1-S2H3FP1_U7": "/Users/erikstorrs/Downloads/HT891Z1-S2H3FP1_U7.ome.tif",
+        "HT913Z1-S2H1Fp1_U24": "/Users/erikstorrs/Downloads/HT913Z1_U24.ome.tif"
+      }
     }
   ]
 }

@@ -144,7 +144,6 @@ CODEX_REQUIRED_FIELDS = [
     "SIZE_X",
     "SIZE_Y",
     "SIZE_Z",
-    "CHANNEL_METADATA_ID",
     "EXPERIMENTAL_STRATEGY_AND_DATA_SUBTYPES",
     "DE_IDENTIFICATION_METHOD_TYPE",
     "LICENSE",
@@ -152,10 +151,7 @@ CODEX_REQUIRED_FIELDS = [
     "IMAGING_EQUIPMENT_MANUFACTURER",
     "CITATION_OR_DOI",
     "STAINING_METHOD",
-    "OBJECTIVE",
-    "NOMINAL_MAGNIFICATION",
     "PASSED_QC",
-    "QC_COMMENT",
     "SPECIES",
     "HAS_SLIDE_LABEL",
     "DE_IDENTIFIED",
@@ -183,6 +179,59 @@ CODEX_CHANNEL_FIELDS = [
     "OLIGO_BARCODE_LOWER_STRAND",
     "DILUTION",
     "CONCENTRATION",
+]
+
+HE_METADATA_FIELDS = [
+    "WUSTL Participant",
+    "WUSTL Specimen",
+    "WUSTL Path",
+    "HTAN_DATA_FILE_ID",
+    "HTAN_PARENT_ID",
+    "CITATION_OR_DOI",
+    "DE_IDENTIFICATION_METHOD_DESCRIPTION",
+    "DE_IDENTIFICATION_METHOD_TYPE",
+    "DE_IDENTIFICATION_SOFTWARE",
+    "DE_IDENTIFIED",
+    "EXPERIMENTAL_STRATEGY_AND_DATA_SUBTYPES",
+    "HAS_SLIDE_LABEL",
+    "IMAGE_MODALITY",
+    "IMAGING_EQUIPMENT_MANUFACTURER",
+    "IMAGING_EQUIPMENT_MODEL",
+    "IMAGING_PROTOCOL",
+    "IMAGING_SOFTWARE",
+    "IMMERSION",
+    "LENS_NUMERICAL_APERTURE",
+    "LICENSE",
+    "NOMINAL_MAGNIFICATION",
+    "OBJECTIVE",
+    "PASSED_QC",
+    "QC_COMMENT",
+    "SLIDE_LABEL_REDACTED",
+    "SPECIES",
+    "STAINING_METHOD",
+    "ANNOTATION_TYPE",
+    "FILENAME",
+    "FILE_FORMAT",
+    "HAS_ANNOTATIONS",
+]
+
+HE_REQUIRED_FIELDS = [
+    "HTAN_DATA_FILE_ID",
+    "HTAN_PARENT_ID",
+    "CITATION_OR_DOI",
+    "DE_IDENTIFICATION_METHOD_TYPE",
+    "DE_IDENTIFIED",
+    "EXPERIMENTAL_STRATEGY_AND_DATA_SUBTYPES",
+    "HAS_SLIDE_LABEL",
+    "IMAGE_MODALITY",
+    "IMAGING_EQUIPMENT_MANUFACTURER",
+    "LICENSE",
+    "PASSED_QC",
+    "SPECIES",
+    "STAINING_METHOD",
+    "FILENAME",
+    "FILE_FORMAT",
+    "HAS_ANNOTATIONS",
 ]
 
 
@@ -1281,17 +1330,27 @@ def extract_codex_row(source_path: Path) -> tuple[dict[str, str], list[dict[str,
         "IMAGING_ASSAY_TYPE": "CODEX",
         "PHYSICAL_SIZE_X": maybe_number_to_string(pixels.physical_size_x),
         "PHYSICAL_SIZE_Y": maybe_number_to_string(pixels.physical_size_y),
-        "PHYSICAL_SIZE_Z": maybe_number_to_string(pixels.physical_size_z),
+        "PHYSICAL_SIZE_Z": maybe_number_to_string(pixels.physical_size_z) or "0",
         "SIZE_C": maybe_number_to_string(pixels.size_c),
         "SIZE_T": maybe_number_to_string(pixels.size_t),
         "SIZE_X": maybe_number_to_string(pixels.size_x),
         "SIZE_Y": maybe_number_to_string(pixels.size_y),
         "SIZE_Z": maybe_number_to_string(pixels.size_z),
+        "CHANNEL_METADATA_ID": "",
         "EXPERIMENTAL_STRATEGY_AND_DATA_SUBTYPES": "Pathological",
+        "DE_IDENTIFICATION_METHOD_TYPE": "Automatic",
         "LICENSE": "CC BY 4.0",
         "IMAGE_MODALITY": "SM",
+        "IMAGING_EQUIPMENT_MANUFACTURER": "Akoya",
+        "CITATION_OR_DOI": "https://doi.org/10.1158/2159-8290.CD-26-0012",
         "STAINING_METHOD": "CODEX",
+        "OBJECTIVE": "",
+        "NOMINAL_MAGNIFICATION": "",
+        "PASSED_QC": "TRUE",
+        "QC_COMMENT": "",
         "SPECIES": "9606 (Homo sapiens)",
+        "HAS_SLIDE_LABEL": "FALSE",
+        "DE_IDENTIFIED": "TRUE",
     }
 
     channel_rows: list[dict[str, str]] = []
@@ -1324,9 +1383,6 @@ def extract_codex_row(source_path: Path) -> tuple[dict[str, str], list[dict[str,
             }
         )
 
-    if not derived["PHYSICAL_SIZE_Z"]:
-        warnings.append("PHYSICAL_SIZE_Z was not present in the OME metadata")
-
     return derived, channel_rows, warnings
 
 
@@ -1335,6 +1391,52 @@ def required_fields_for_codex_row(row: dict[str, str]) -> list[str]:
     if parse_bool(row.get("HAS_SLIDE_LABEL")):
         required.append("SLIDE_LABEL_REDACTED")
     return required
+
+
+def extract_he_row(source_path: Path) -> tuple[dict[str, str], list[str]]:
+    from ome_types import from_tiff
+
+    ome = from_tiff(source_path)
+    warnings: list[str] = []
+
+    derived = {
+        "CITATION_OR_DOI": "https://doi.org/10.1158/2159-8290.CD-26-0012",
+        "DE_IDENTIFICATION_METHOD_TYPE": "Automatic",
+        "DE_IDENTIFIED": "TRUE",
+        "EXPERIMENTAL_STRATEGY_AND_DATA_SUBTYPES": "Pathological",
+        "HAS_SLIDE_LABEL": "FALSE",
+        "IMAGE_MODALITY": "SM",
+        "IMAGING_EQUIPMENT_MANUFACTURER": "Akoya",
+        "IMAGING_SOFTWARE": as_clean_string(getattr(ome, "creator", "")),
+        "LICENSE": "CC BY 4.0",
+        "NOMINAL_MAGNIFICATION": "",
+        "OBJECTIVE": "",
+        "PASSED_QC": "TRUE",
+        "QC_COMMENT": "",
+        "SPECIES": "9606 (Homo sapiens)",
+        "STAINING_METHOD": "H&E",
+        "FILENAME": source_path.name,
+        "FILE_FORMAT": "ome-tiff" if is_ome_tiff(source_path.name) else source_path.suffix.lstrip("."),
+        "HAS_ANNOTATIONS": "FALSE",
+    }
+
+    return derived, warnings
+
+
+def required_fields_for_he_row(row: dict[str, str]) -> list[str]:
+    required = list(HE_REQUIRED_FIELDS)
+    if parse_bool(row.get("HAS_SLIDE_LABEL")):
+        required.append("SLIDE_LABEL_REDACTED")
+    if parse_bool(row.get("HAS_ANNOTATIONS")):
+        required.append("ANNOTATION_TYPE")
+
+    deduped = []
+    seen = set()
+    for field in required:
+        if field not in seen:
+            seen.add(field)
+            deduped.append(field)
+    return deduped
 
 
 def process_codex_job(job: dict, config_dir: Path) -> dict[str, object]:
@@ -1496,6 +1598,145 @@ def process_codex_job(job: dict, config_dir: Path) -> dict[str, object]:
     }
 
 
+def process_he_job(job: dict, config_dir: Path) -> dict[str, object]:
+    survey_csv = resolve_path(job["survey_csv"], config_dir)
+    output_dir = resolve_path(job.get("output_dir", "outputs_he"), config_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    include_specimens = set(job.get("include_specimens") or [])
+    path_overrides = {key: as_clean_string(value) for key, value in (job.get("path_overrides_by_specimen") or {}).items()}
+    experiment_filter = as_clean_string(job.get("experiment_filter", "he")) or "he"
+    level_filter = as_clean_string(job.get("level_filter", "level2")) or "level2"
+
+    metadata_rows = build_codex_rows_from_survey(survey_csv, include_specimens, experiment_filter, level_filter)
+    for row in metadata_rows:
+        for field in list(row.keys()):
+            if field not in HE_METADATA_FIELDS:
+                row.pop(field, None)
+        for field in HE_METADATA_FIELDS:
+            row.setdefault(field, "")
+
+    fieldnames = list(HE_METADATA_FIELDS)
+    output_filename = job.get("metadata_output_filename") or "HTAN2 3D Prostate Breast_ Digital Pathology Level 2 - HE.generated.csv"
+    metadata_output_path = output_dir / output_filename
+    fill_log_path = output_dir / (Path(output_filename).stem + ".fill_log.csv")
+    unresolved_path = output_dir / (Path(output_filename).stem + ".unresolved_required_fields.csv")
+
+    job_name = as_clean_string(job.get("name") or "he")
+    log(f"=== Job: {job_name} (he) ===")
+    log(f"Loaded survey CSV: {survey_csv}")
+    log(f"Output directory: {output_dir}")
+    log(f"Specimens selected for processing: {len(metadata_rows)}")
+
+    fill_log_rows: list[dict[str, str]] = []
+    unresolved_rows: list[dict[str, str]] = []
+
+    for index, row in enumerate(metadata_rows, start=1):
+        specimen = as_clean_string(row.get("WUSTL Specimen"))
+        source_path_text = path_overrides.get(specimen, as_clean_string(row.get("WUSTL Path")))
+        source_path = resolve_path(source_path_text, config_dir)
+
+        log(f"[{index}/{len(metadata_rows)}] Processing specimen: {specimen or '<blank>'}")
+        log(f"  Source path: {source_path}")
+
+        if not source_path.exists():
+            log("  Source path not found; leaving row unresolved")
+            unresolved_rows.append(
+                {
+                    "WUSTL Specimen": specimen,
+                    "FIELD": "WUSTL Path",
+                    "VALUE": source_path_text,
+                    "DETAIL": "Source H&E image path does not exist",
+                }
+            )
+            continue
+
+        try:
+            derived, warnings = extract_he_row(source_path)
+        except Exception as exc:
+            log(f"  Failed to read OME metadata: {exc}")
+            unresolved_rows.append(
+                {
+                    "WUSTL Specimen": specimen,
+                    "FIELD": "__file__",
+                    "VALUE": source_path.name,
+                    "DETAIL": f"Could not read OME metadata: {exc}",
+                }
+            )
+            continue
+
+        for warning in warnings:
+            fill_log_rows.append(
+                {
+                    "WUSTL Specimen": specimen,
+                    "FIELD": "__warning__",
+                    "OLD_VALUE": "",
+                    "NEW_VALUE": "",
+                    "ACTION": "warning",
+                    "SOURCE": warning,
+                }
+            )
+
+        for field, value in derived.items():
+            if is_blank(value):
+                continue
+            old_value = as_clean_string(row.get(field, ""))
+            if old_value != value:
+                fill_log_rows.append(
+                    {
+                        "WUSTL Specimen": specimen,
+                        "FIELD": field,
+                        "OLD_VALUE": old_value,
+                        "NEW_VALUE": value,
+                        "ACTION": "filled",
+                        "SOURCE": "he_ome",
+                    }
+                )
+            row[field] = value
+
+        for field in required_fields_for_he_row(row):
+            if is_blank(row.get(field)):
+                unresolved_rows.append(
+                    {
+                        "WUSTL Specimen": specimen,
+                        "FIELD": field,
+                        "VALUE": "",
+                        "DETAIL": "Required field still blank after automated template generation",
+                    }
+                )
+
+        log(
+            "  Completed"
+            f" | staining={as_clean_string(row.get('STAINING_METHOD')) or '<blank>'}"
+            f" | file_format={as_clean_string(row.get('FILE_FORMAT')) or '<blank>'}"
+            f" | software={as_clean_string(row.get('IMAGING_SOFTWARE')) or '<blank>'}"
+        )
+
+    csv_write_rows(metadata_output_path, metadata_rows, fieldnames)
+    log(f"Wrote metadata output: {metadata_output_path}")
+    csv_write_rows(
+        fill_log_path,
+        fill_log_rows,
+        ["WUSTL Specimen", "FIELD", "OLD_VALUE", "NEW_VALUE", "ACTION", "SOURCE"],
+    )
+    log(f"Wrote fill log: {fill_log_path}")
+    csv_write_rows(
+        unresolved_path,
+        unresolved_rows,
+        ["WUSTL Specimen", "FIELD", "VALUE", "DETAIL"],
+    )
+    log(f"Wrote unresolved-fields report: {unresolved_path}")
+
+    return {
+        "job_name": job_name,
+        "modality": "he",
+        "metadata_output": str(metadata_output_path),
+        "fill_log_output": str(fill_log_path),
+        "unresolved_output": str(unresolved_path),
+        "processed_specimen_count": len(metadata_rows),
+    }
+
+
 def build_panel_outputs(output_dir: Path, panel_exports: list[dict], hgnc_version: str) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     panels_dir = output_dir / "panels"
     panels_dir.mkdir(parents=True, exist_ok=True)
@@ -1596,6 +1837,8 @@ def process_job(job: dict, config_dir: Path) -> dict[str, object]:
 
     if modality == "codex":
         return process_codex_job(job, config_dir)
+    if modality == "he":
+        return process_he_job(job, config_dir)
 
     metadata_csv = resolve_path(job["metadata_csv"], config_dir)
     output_dir = resolve_path(job.get("output_dir", f"outputs_{modality}"), config_dir)

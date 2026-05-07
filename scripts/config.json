@@ -43,6 +43,17 @@
       "metadata_output_filename": "HTAN2 3D Prostate Breast_ Multiplex Microscopy Level 2 - CODEX.generated.csv",
       "include_specimens": [],
       "path_overrides_by_specimen": {}
+    },
+    {
+      "name": "he-level2",
+      "modality": "he",
+      "survey_csv": "he_reference/HTAN2 3D Prostate Breast Data Survey - Datafiles.csv",
+      "experiment_filter": "he",
+      "level_filter": "level2",
+      "output_dir": "outputs_he",
+      "metadata_output_filename": "HTAN2 3D Prostate Breast_ Digital Pathology Level 2 - HE.generated.csv",
+      "include_specimens": [],
+      "path_overrides_by_specimen": {}
     }
   ]
 }
